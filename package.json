@@ -1,0 +1,34 @@
+{
+  "name": "diario-gi",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Diario gastrointestinal personal (PWA offline)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "gen-icons": "node scripts/gen-icons.mjs"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.0.1",
+    "dexie": "^4.0.11",
+    "dexie-react-hooks": "^1.1.7",
+    "date-fns": "^4.1.0",
+    "papaparse": "^5.4.1",
+    "preact": "^10.25.4",
+    "preact-iso": "^2.9.1"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "@types/papaparse": "^5.3.15",
+    "sharp": "^0.33.5",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^2.1.8"
+  }
+}
