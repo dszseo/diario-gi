@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks'
-import { useLocation } from 'preact-iso'
+import { useLocation } from '../router'
 import type {
   EventType,
   GasData,
@@ -29,14 +29,12 @@ const TITLES: Record<EventType, string> = {
   symptom: 'Síntoma',
 }
 
-function initialTs(): number {
-  const params = new URLSearchParams(location.search)
-  const date = params.get('date')
-  if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+function initialTs(dateParam: string | null): number {
+  if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
     // fecha indicada + hora actual
     const now = new Date()
     return fromDatetimeLocalValue(
-      `${date}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+      `${dateParam}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
     )
   }
   return Date.now()
@@ -47,7 +45,7 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
   const evType = (type ?? 'meal') as EventType
   const editing = !!id
 
-  const [ts, setTs] = useState<number>(initialTs)
+  const [ts, setTs] = useState<number>(() => initialTs(loc.query.get('date')))
   const [notes, setNotes] = useState('')
   const [meal, setMeal] = useState<MealData>({ items: [], amount: '' })
   const [stool, setStool] = useState<StoolData>({})

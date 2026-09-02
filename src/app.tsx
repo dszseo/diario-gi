@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact'
-import { useLocation } from 'preact-iso'
 import { useEffect, useState } from 'preact/hooks'
+import { useLocation } from './router'
 import { registerSW } from 'virtual:pwa-register'
 import { toastMessage } from './lib/toast'
 

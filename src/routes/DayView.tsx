@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useLocation } from 'preact-iso'
+import { useLocation } from '../router'
 import { eventsOfDay } from '../db/events'
 import { addDaysKey, longDate, todayKey } from '../lib/datetime'
 import { TimelineView } from '../components/TimelineView'

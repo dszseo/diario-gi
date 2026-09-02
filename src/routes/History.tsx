@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useLocation } from 'preact-iso'
+import { useLocation } from '../router'
 import { useState } from 'preact/hooks'
 import { daysWithEvents } from '../db/events'
 import { monthTitle, todayKey } from '../lib/datetime'

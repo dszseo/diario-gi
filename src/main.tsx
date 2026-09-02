@@ -1,6 +1,6 @@
 import { render } from 'preact'
-import { LocationProvider, Router, Route } from 'preact-iso'
 import './styles/base.css'
+import { Router } from './router'
 import { Shell } from './app'
 import { Today } from './routes/Today'
 import { AddEditEvent } from './routes/AddEditEvent'
@@ -12,22 +12,21 @@ import { requestPersistentStorage } from './lib/persist'
 
 requestPersistentStorage()
 
+const routes = [
+  { pattern: '/', component: Today },
+  { pattern: '/add/:type', component: AddEditEvent },
+  { pattern: '/edit/:type/:id', component: AddEditEvent },
+  { pattern: '/history', component: History },
+  { pattern: '/day/:date', component: DayView },
+  { pattern: '/export', component: ExportView },
+  { pattern: '/settings', component: Settings },
+]
+
 function App() {
   return (
-    <LocationProvider>
-      <Shell>
-        <Router>
-          <Route path="/" component={Today} />
-          <Route path="/add/:type" component={AddEditEvent} />
-          <Route path="/edit/:type/:id" component={AddEditEvent} />
-          <Route path="/history" component={History} />
-          <Route path="/day/:date" component={DayView} />
-          <Route path="/export" component={ExportView} />
-          <Route path="/settings" component={Settings} />
-          <Route default component={Today} />
-        </Router>
-      </Shell>
-    </LocationProvider>
+    <Shell>
+      <Router routes={routes} fallback={Today} />
+    </Shell>
   )
 }
 

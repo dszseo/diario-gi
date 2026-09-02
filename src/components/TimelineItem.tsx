@@ -1,4 +1,4 @@
-import { useLocation } from 'preact-iso'
+import { useLocation } from '../router'
 import type { GiEvent } from '../db/types'
 import { localTime } from '../lib/datetime'
 import { mainText, subText, TYPE_META } from '../lib/summary'
