@@ -48,6 +48,7 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
   const [ts, setTs] = useState<number>(() => initialTs(loc.query.get('date')))
   const [notes, setNotes] = useState('')
   const [meal, setMeal] = useState<MealData>({ items: [], amount: '' })
+  const [mealPending, setMealPending] = useState('')
   const [stool, setStool] = useState<StoolData>({})
   const [gas, setGas] = useState<GasData>({})
   const [symptom, setSymptom] = useState<SymptomData>({ symptomType: '', intensity: 5 })
@@ -80,19 +81,29 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
   const favorites = useLiveQuery(() => listFavorites(), [], [])
 
   const canSave = useMemo(() => {
-    if (evType === 'meal') return meal.items.length > 0
+    if (evType === 'meal') return meal.items.length > 0 || mealPending.trim().length > 0
     if (evType === 'stool') return true
     if (evType === 'gas') return true
     if (evType === 'symptom') return symptom.symptomType.trim().length > 0
     return false
-  }, [evType, meal, symptom])
+  }, [evType, meal, mealPending, symptom])
 
   if (!loaded) return <p class="hint">Cargando…</p>
 
   async function save() {
+    // Incluye el alimento escrito aunque el usuario no lo haya convertido en chip,
+    // y elimina duplicados por nombre (sin distinguir mayúsculas).
+    const pending = mealPending.trim()
+    const seen = new Set<string>()
+    const mealItems = [...meal.items, ...(pending ? [{ name: pending }] : [])].filter((i) => {
+      const k = i.name.trim().toLowerCase()
+      if (!k || seen.has(k)) return false
+      seen.add(k)
+      return true
+    })
     const data =
       evType === 'meal'
-        ? { items: meal.items, amount: meal.amount?.trim() || undefined }
+        ? { items: mealItems, amount: meal.amount?.trim() || undefined }
         : evType === 'stool'
           ? stool
           : evType === 'gas'
@@ -117,6 +128,7 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
         <MealForm
           data={meal}
           onChange={setMeal}
+          onPendingChange={setMealPending}
           favorites={favorites ?? []}
           onSaveFavorite={() => {
             setFavName(guessFavName())
@@ -219,11 +231,13 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
 function MealForm({
   data,
   onChange,
+  onPendingChange,
   favorites,
   onSaveFavorite,
 }: {
   data: MealData
   onChange: (d: MealData) => void
+  onPendingChange: (text: string) => void
   favorites: { id: string; name: string; items: MealItem[] }[]
   onSaveFavorite: () => void
 }) {
@@ -257,7 +271,11 @@ function MealForm({
 
       <div class="field">
         <label>Alimentos / platos</label>
-        <FoodChipsInput items={data.items} onChange={(items) => onChange({ ...data, items })} />
+        <FoodChipsInput
+          items={data.items}
+          onChange={(items) => onChange({ ...data, items })}
+          onPendingChange={onPendingChange}
+        />
       </div>
 
       <div class="field">

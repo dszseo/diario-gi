@@ -5,13 +5,21 @@ import { suggestFoods } from '../db/foods'
 export function FoodChipsInput({
   items,
   onChange,
+  onPendingChange,
 }: {
   items: MealItem[]
   onChange: (items: MealItem[]) => void
+  /** Texto escrito pero aún no convertido en chip (para que el padre lo pueda guardar). */
+  onPendingChange?: (text: string) => void
 }) {
-  const [text, setText] = useState('')
+  const [text, setTextRaw] = useState('')
   const [sugs, setSugs] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+
+  function setText(v: string) {
+    setTextRaw(v)
+    onPendingChange?.(v)
+  }
 
   useEffect(() => {
     let alive = true
@@ -33,11 +41,9 @@ export function FoodChipsInput({
   function add(name: string) {
     const clean = name.trim()
     if (!clean) return
-    if (items.some((i) => i.name.toLowerCase() === clean.toLowerCase())) {
-      setText('')
-      return
+    if (!items.some((i) => i.name.toLowerCase() === clean.toLowerCase())) {
+      onChange([...items, { name: clean }])
     }
-    onChange([...items, { name: clean }])
     setText('')
     setSugs([])
     inputRef.current?.focus()
@@ -61,22 +67,35 @@ export function FoodChipsInput({
           ))}
         </div>
       )}
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder="Añadir alimento y pulsar Intro…"
-        value={text}
-        enterkeyhint="done"
-        onInput={(e) => setText((e.target as HTMLInputElement).value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault()
-            add(text)
-          } else if (e.key === 'Backspace' && !text && items.length) {
-            remove(items.length - 1)
-          }
-        }}
-      />
+      <div class="row">
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Escribe un alimento…"
+          value={text}
+          enterkeyhint="done"
+          autocomplete="off"
+          onInput={(e) => setText((e.target as HTMLInputElement).value)}
+          onBlur={() => text.trim() && add(text)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+              e.preventDefault()
+              add(text)
+            } else if (e.key === 'Backspace' && !text && items.length) {
+              remove(items.length - 1)
+            }
+          }}
+        />
+        <button
+          type="button"
+          class="btn primary"
+          style={{ flex: '0 0 auto' }}
+          disabled={!text.trim()}
+          onClick={() => add(text)}
+        >
+          Añadir
+        </button>
+      </div>
       {sugs.length > 0 && (
         <div class="chips" style={{ marginTop: '8px' }}>
           {sugs.map((s) => (
@@ -86,9 +105,7 @@ export function FoodChipsInput({
           ))}
         </div>
       )}
-      {text.trim() && !sugs.some((s) => s.toLowerCase() === text.trim().toLowerCase()) && (
-        <div class="hint">Pulsa Intro para añadir «{text.trim()}» como alimento nuevo.</div>
-      )}
+      <div class="hint">Añade los alimentos uno a uno (botón «Añadir» o la tecla Intro).</div>
     </div>
   )
 }
