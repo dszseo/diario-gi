@@ -15,6 +15,10 @@ export function FoodChipsInput({
   const [text, setTextRaw] = useState('')
   const [sugs, setSugs] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  // Se pone a true mientras se pulsa una sugerencia o el botón «Añadir», para que
+  // el onBlur del input no añada el texto a medio escribir y borre la sugerencia
+  // antes de que llegue su click (pasaba en Chrome Android).
+  const pickingRef = useRef(false)
 
   function setText(v: string) {
     setTextRaw(v)
@@ -39,6 +43,7 @@ export function FoodChipsInput({
   }, [text, items])
 
   function add(name: string) {
+    pickingRef.current = false
     const clean = name.trim()
     if (!clean) return
     if (!items.some((i) => i.name.toLowerCase() === clean.toLowerCase())) {
@@ -51,6 +56,13 @@ export function FoodChipsInput({
 
   function remove(idx: number) {
     onChange(items.filter((_, i) => i !== idx))
+  }
+
+  // Marca que se está pulsando un botón (sugerencia o «Añadir») para que el onBlur
+  // del input lo ignore. Va en pointerdown, que se dispara antes del blur tanto con
+  // ratón como táctil, y sin preventDefault (cancelar el gesto cancelaría el click).
+  const markPicking = () => {
+    pickingRef.current = true
   }
 
   return (
@@ -76,7 +88,13 @@ export function FoodChipsInput({
           enterkeyhint="done"
           autocomplete="off"
           onInput={(e) => setText((e.target as HTMLInputElement).value)}
-          onBlur={() => text.trim() && add(text)}
+          onBlur={() => {
+            if (pickingRef.current) {
+              pickingRef.current = false
+              return
+            }
+            if (text.trim()) add(text)
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ',') {
               e.preventDefault()
@@ -91,6 +109,7 @@ export function FoodChipsInput({
           class="btn primary"
           style={{ flex: '0 0 auto' }}
           disabled={!text.trim()}
+          onPointerDown={markPicking}
           onClick={() => add(text)}
         >
           Añadir
@@ -99,7 +118,13 @@ export function FoodChipsInput({
       {sugs.length > 0 && (
         <div class="chips" style={{ marginTop: '8px' }}>
           {sugs.map((s) => (
-            <button type="button" class="chip selectable" key={s} onClick={() => add(s)}>
+            <button
+              type="button"
+              class="chip selectable"
+              key={s}
+              onPointerDown={markPicking}
+              onClick={() => add(s)}
+            >
               + {s}
             </button>
           ))}
