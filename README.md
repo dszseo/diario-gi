@@ -42,9 +42,9 @@ vite-plugin-pwa (Workbox).
 Una fila por acontecimiento. UTF-8 **con BOM** y saltos `\r\n` (Excel lo abre con
 acentos correctos). Separador seleccionable: `,` (Python/IA) o `;` (Excel en español).
 
-Columnas: `fecha, hora, tipo, contenido, cantidad, bristol, bristol_desc, urgencia,
-esfuerzo, evacuacion_incompleta, dolor, gases_intensidad, hinchazon, eructos,
-flatulencia, sintoma, intensidad, duracion_min, notas`.
+Columnas: `fecha, hora, tipo, contenido, copiosidad, alergenos, bristol, bristol_desc,
+urgencia, esfuerzo, evacuacion_incompleta, dolor, gases_intensidad, hinchazon,
+eructos, flatulencia, sintoma, intensidad, duracion_min, omeprazol, notas`.
 
 Los campos que no aplican a un tipo van vacíos (una comida no tiene `bristol`, etc.).
 

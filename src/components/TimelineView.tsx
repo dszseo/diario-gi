@@ -12,6 +12,7 @@ const FILTERS: { id: EventType | 'all'; label: string }[] = [
   { id: 'stool', label: 'Deposiciones' },
   { id: 'gas', label: 'Gases' },
   { id: 'symptom', label: 'Síntomas' },
+  { id: 'omeprazole', label: 'Omeprazol' },
 ]
 
 export function TimelineView({

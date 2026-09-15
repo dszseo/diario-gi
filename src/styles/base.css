@@ -16,6 +16,7 @@
   --stool: #a16207;
   --gas: #0ea5e9;
   --symptom: #e11d48;
+  --omeprazole: #7c3aed;
 
   --radius: 14px;
   --radius-sm: 10px;
@@ -42,6 +43,7 @@
     --stool: #d9a441;
     --gas: #56ccf2;
     --symptom: #fb7185;
+    --omeprazole: #a78bfa;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 }
@@ -142,9 +144,10 @@ textarea { resize: vertical; min-height: 62px; }
   backdrop-filter: blur(8px);
   border-top: 1px solid var(--border);
 }
-.quickbar .wrap { max-width: 620px; margin: 0 auto; display: flex; gap: 6px; width: 100%; }
+.quickbar .wrap { max-width: 620px; margin: 0 auto; display: flex; gap: 4px; width: 100%; }
 .quick-btn {
   flex: 1;
+  min-width: 0;
   min-height: 54px;
   display: flex;
   flex-direction: column;
@@ -154,8 +157,11 @@ textarea { resize: vertical; min-height: 62px; }
   border-radius: var(--radius);
   background: var(--surface-2);
   color: var(--text);
-  font-size: .72rem;
+  font-size: .66rem;
   font-weight: 600;
+  padding: 0 2px;
+  text-align: center;
+  line-height: 1.1;
 }
 .quick-btn .em { font-size: 1.25rem; }
 .quick-btn:active { transform: scale(.96); }
@@ -192,6 +198,7 @@ textarea { resize: vertical; min-height: 62px; }
 .b-stool { background: var(--stool); }
 .b-gas { background: var(--gas); }
 .b-symptom { background: var(--symptom); }
+.b-omeprazole { background: var(--omeprazole); }
 
 .tl-actions { display: flex; gap: 2px; }
 .tl-actions .icon-btn { min-width: 38px; min-height: 38px; font-size: 1rem; }

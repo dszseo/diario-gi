@@ -77,7 +77,7 @@ export async function eventsOfDay(dateKey: string): Promise<GiEvent[]> {
 export async function daysWithEvents(): Promise<Map<string, Record<EventType, number>>> {
   const out = new Map<string, Record<EventType, number>>()
   await db.events.each((ev) => {
-    const cur = out.get(ev.localDate) ?? { meal: 0, stool: 0, gas: 0, symptom: 0 }
+    const cur = out.get(ev.localDate) ?? { meal: 0, stool: 0, gas: 0, symptom: 0, omeprazole: 0 }
     cur[ev.type]++
     out.set(ev.localDate, cur)
   })

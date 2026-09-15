@@ -1,5 +1,5 @@
 import Papa from 'papaparse'
-import type { GiEvent, GasData, MealData, StoolData, SymptomData } from '../db/types'
+import type { GiEvent, GasData, MealData, OmeprazoleData, StoolData, SymptomData } from '../db/types'
 import { localDateKey, localTime } from '../lib/datetime'
 import { bristolInfo } from '../lib/bristol'
 import { labelOf, yesNo } from '../lib/scales'
@@ -9,7 +9,8 @@ export const CSV_COLUMNS = [
   'hora',
   'tipo',
   'contenido',
-  'cantidad',
+  'copiosidad',
+  'alergenos',
   'bristol',
   'bristol_desc',
   'urgencia',
@@ -23,6 +24,7 @@ export const CSV_COLUMNS = [
   'sintoma',
   'intensidad',
   'duracion_min',
+  'omeprazol',
   'notas',
 ] as const
 
@@ -33,6 +35,7 @@ const TYPE_LABEL: Record<GiEvent['type'], string> = {
   stool: 'Deposición',
   gas: 'Gases',
   symptom: 'Síntoma',
+  omeprazole: 'Omeprazol',
 }
 
 function emptyRow(): CsvRow {
@@ -49,7 +52,8 @@ export function eventToRow(ev: GiEvent): CsvRow {
   if (ev.type === 'meal') {
     const d = ev.data as MealData
     row.contenido = (d.items ?? []).map((i) => i.name.trim()).filter(Boolean).join(' + ')
-    row.cantidad = d.amount?.trim() ?? ''
+    row.copiosidad = labelOf('portion', d.portion)
+    row.alergenos = (d.triggers ?? []).map((t) => labelOf('mealTrigger', t)).join(' + ')
   } else if (ev.type === 'stool') {
     const d = ev.data as StoolData
     const info = bristolInfo(d.bristol)
@@ -72,6 +76,9 @@ export function eventToRow(ev: GiEvent): CsvRow {
     row.sintoma = d.symptomType ?? ''
     row.intensidad = d.intensity === undefined ? '' : String(d.intensity)
     row.duracion_min = d.durationMin === undefined ? '' : String(d.durationMin)
+  } else if (ev.type === 'omeprazole') {
+    const d = ev.data as OmeprazoleData
+    row.omeprazol = d.taken === false ? 'No' : 'Sí'
   }
   return row
 }

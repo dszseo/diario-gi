@@ -10,6 +10,7 @@ const DOT: Record<string, string> = {
   stool: 'var(--stool)',
   gas: 'var(--gas)',
   symptom: 'var(--symptom)',
+  omeprazole: 'var(--omeprazole)',
 }
 
 function buildGrid(year: number, month0: number): (string | null)[] {
@@ -73,7 +74,7 @@ export function History() {
               <span>{dayNum}</span>
               <span class="dots">
                 {counts &&
-                  (['meal', 'stool', 'gas', 'symptom'] as const)
+                  (['meal', 'stool', 'gas', 'symptom', 'omeprazole'] as const)
                     .filter((t) => counts[t] > 0)
                     .map((t) => (
                       <span class="dot" key={t} style={{ background: DOT[t] }} />

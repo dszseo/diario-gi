@@ -1,6 +1,6 @@
-import type { Bloating, GasIntensity, Level4 } from '../lib/scales'
+import type { Bloating, GasIntensity, Level4, MealTrigger, Portion } from '../lib/scales'
 
-export type EventType = 'meal' | 'stool' | 'gas' | 'symptom'
+export type EventType = 'meal' | 'stool' | 'gas' | 'symptom' | 'omeprazole'
 
 export interface MealItem {
   name: string
@@ -8,7 +8,8 @@ export interface MealItem {
 
 export interface MealData {
   items: MealItem[]
-  amount?: string // cantidad (opcional, a nivel de comida)
+  portion?: Portion // copiosidad: ligera / normal / copiosa
+  triggers?: MealTrigger[] // gluten, lactosa, alcohol, picante, fritos, ultraprocesado
 }
 
 export interface StoolData {
@@ -34,7 +35,11 @@ export interface SymptomData {
   durationMin?: number
 }
 
-export type EventData = MealData | StoolData | GasData | SymptomData
+export interface OmeprazoleData {
+  taken?: boolean // sí/no (la hora la da ts)
+}
+
+export type EventData = MealData | StoolData | GasData | SymptomData | OmeprazoleData
 
 export interface GiEvent {
   id: string

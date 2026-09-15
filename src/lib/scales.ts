@@ -33,6 +33,26 @@ export const BLOATING: { value: Bloating; label: string }[] = [
   { value: 'intense', label: 'Intensa' },
 ]
 
+export type Portion = 'ligera' | 'normal' | 'copiosa'
+
+export const PORTION: { value: Portion; label: string }[] = [
+  { value: 'ligera', label: 'Ligera' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'copiosa', label: 'Copiosa' },
+]
+
+// Cosas típicas que pueden sentar mal, no una lista exhaustiva de alérgenos.
+export type MealTrigger = 'gluten' | 'lactosa' | 'alcohol' | 'picante' | 'fritos' | 'ultraprocesado'
+
+export const MEAL_TRIGGERS: { value: MealTrigger; label: string }[] = [
+  { value: 'gluten', label: 'Gluten' },
+  { value: 'lactosa', label: 'Lactosa' },
+  { value: 'alcohol', label: 'Alcohol' },
+  { value: 'picante', label: 'Picante' },
+  { value: 'fritos', label: 'Fritos' },
+  { value: 'ultraprocesado', label: 'Ultraprocesado' },
+]
+
 const asMap = (arr: { value: string; label: string }[]) =>
   Object.fromEntries(arr.map((x) => [x.value, x.label]))
 
@@ -41,6 +61,8 @@ export const LABELS = {
   strain: asMap(STRAIN),
   gasIntensity: asMap(GAS_INTENSITY),
   bloating: asMap(BLOATING),
+  portion: asMap(PORTION),
+  mealTrigger: asMap(MEAL_TRIGGERS),
 } as const
 
 export function labelOf(scale: keyof typeof LABELS, value: string | undefined): string {

@@ -5,6 +5,7 @@ import type {
   GasData,
   MealData,
   MealItem,
+  OmeprazoleData,
   StoolData,
   SymptomData,
 } from '../db/types'
@@ -18,7 +19,8 @@ import { FoodChipsInput } from '../components/FoodChipsInput'
 import { SymptomPicker } from '../components/SymptomPicker'
 import { CollapsibleSection } from '../components/CollapsibleSection'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { BLOATING, GAS_INTENSITY, STRAIN, URGENCY } from '../lib/scales'
+import { BLOATING, GAS_INTENSITY, MEAL_TRIGGERS, PORTION, STRAIN, URGENCY } from '../lib/scales'
+import type { MealTrigger } from '../lib/scales'
 import { fromDatetimeLocalValue } from '../lib/datetime'
 import { toast } from '../lib/toast'
 
@@ -27,6 +29,7 @@ const TITLES: Record<EventType, string> = {
   stool: 'Deposición',
   gas: 'Gases',
   symptom: 'Síntoma',
+  omeprazole: 'Omeprazol',
 }
 
 function initialTs(dateParam: string | null): number {
@@ -47,11 +50,12 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
 
   const [ts, setTs] = useState<number>(() => initialTs(loc.query.get('date')))
   const [notes, setNotes] = useState('')
-  const [meal, setMeal] = useState<MealData>({ items: [], amount: '' })
+  const [meal, setMeal] = useState<MealData>({ items: [] })
   const [mealPending, setMealPending] = useState('')
   const [stool, setStool] = useState<StoolData>({})
   const [gas, setGas] = useState<GasData>({})
   const [symptom, setSymptom] = useState<SymptomData>({ symptomType: '', intensity: 5 })
+  const [omeprazole, setOmeprazole] = useState<OmeprazoleData>({ taken: true })
   const [loaded, setLoaded] = useState(!editing)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [showSaveFav, setShowSaveFav] = useState(false)
@@ -69,11 +73,12 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
       setNotes(ev.notes ?? '')
       if (ev.type === 'meal') {
         const md = ev.data as MealData
-        setMeal({ items: md.items ?? [], amount: md.amount ?? '' })
+        setMeal({ items: md.items ?? [], portion: md.portion, triggers: md.triggers ?? [] })
       }
       if (ev.type === 'stool') setStool(ev.data as StoolData)
       if (ev.type === 'gas') setGas(ev.data as GasData)
       if (ev.type === 'symptom') setSymptom(ev.data as SymptomData)
+      if (ev.type === 'omeprazole') setOmeprazole(ev.data as OmeprazoleData)
       setLoaded(true)
     })
   }, [id])
@@ -85,6 +90,7 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
     if (evType === 'stool') return true
     if (evType === 'gas') return true
     if (evType === 'symptom') return symptom.symptomType.trim().length > 0
+    if (evType === 'omeprazole') return true
     return false
   }, [evType, meal, mealPending, symptom])
 
@@ -103,12 +109,14 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
     })
     const data =
       evType === 'meal'
-        ? { items: mealItems, amount: meal.amount?.trim() || undefined }
+        ? { items: mealItems, portion: meal.portion, triggers: meal.triggers }
         : evType === 'stool'
           ? stool
           : evType === 'gas'
             ? gas
-            : { ...symptom, symptomType: symptom.symptomType.trim() }
+            : evType === 'symptom'
+              ? { ...symptom, symptomType: symptom.symptomType.trim() }
+              : omeprazole
     const input = { type: evType, ts, notes, data }
     if (editing && id) {
       await updateEvent(id, input)
@@ -139,6 +147,7 @@ export function AddEditEvent({ type, id }: { type?: string; id?: string }) {
       {evType === 'stool' && <StoolForm data={stool} onChange={setStool} />}
       {evType === 'gas' && <GasForm data={gas} onChange={setGas} />}
       {evType === 'symptom' && <SymptomForm data={symptom} onChange={setSymptom} />}
+      {evType === 'omeprazole' && <OmeprazoleForm data={omeprazole} onChange={setOmeprazole} />}
 
       <div class="field">
         <label>Notas</label>
@@ -279,13 +288,37 @@ function MealForm({
       </div>
 
       <div class="field">
-        <label>Cantidad</label>
-        <input
-          type="text"
-          placeholder="Opcional (ej. plato grande, 2 unidades…)"
-          value={data.amount ?? ''}
-          onInput={(e) => onChange({ ...data, amount: (e.target as HTMLInputElement).value })}
+        <label>Copiosidad</label>
+        <SegmentedScale
+          options={PORTION}
+          value={data.portion}
+          onChange={(portion) => onChange({ ...data, portion })}
         />
+      </div>
+
+      <div class="field">
+        <label>¿Algo que suele sentarte mal?</label>
+        <div class="chips">
+          {MEAL_TRIGGERS.map((t) => {
+            const on = (data.triggers ?? []).includes(t.value)
+            return (
+              <button
+                key={t.value}
+                type="button"
+                class={`chip selectable ${on ? 'on' : ''}`}
+                onClick={() => {
+                  const cur = data.triggers ?? []
+                  const triggers: MealTrigger[] = on
+                    ? cur.filter((x) => x !== t.value)
+                    : [...cur, t.value]
+                  onChange({ ...data, triggers })
+                }}
+              >
+                {t.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {data.items.length > 0 && (
@@ -409,5 +442,21 @@ function SymptomForm({
         </div>
       </CollapsibleSection>
     </>
+  )
+}
+
+function OmeprazoleForm({
+  data,
+  onChange,
+}: {
+  data: OmeprazoleData
+  onChange: (d: OmeprazoleData) => void
+}) {
+  return (
+    <div class="field">
+      <label>Tomado</label>
+      <YesNo value={data.taken ?? true} onChange={(taken) => onChange({ ...data, taken: taken ?? true })} />
+      <div class="hint">La hora la marca el campo «Fecha y hora» de arriba.</div>
+    </div>
   )
 }

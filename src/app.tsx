@@ -108,6 +108,9 @@ function QuickBar() {
         <button class="quick-btn" onClick={() => q('symptom')}>
           <span class="em">🤕</span>Síntoma
         </button>
+        <button class="quick-btn" onClick={() => q('omeprazole')}>
+          <span class="em">💊</span>Omeprazol
+        </button>
       </div>
     </nav>
   )

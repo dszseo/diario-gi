@@ -14,18 +14,23 @@ const base = (over: Partial<GiEvent>): GiEvent => ({
 })
 
 describe('eventToRow', () => {
-  it('comida: contenido y cantidad, campos de bristol vacíos', () => {
+  it('comida: contenido, copiosidad y alérgenos, campos de bristol vacíos', () => {
     const row = eventToRow(
       base({
         type: 'meal',
-        data: { items: [{ name: 'Café con leche' }, { name: '2 magdalenas' }], amount: 'normal' },
+        data: {
+          items: [{ name: 'Café con leche' }, { name: '2 magdalenas' }],
+          portion: 'copiosa',
+          triggers: ['gluten', 'lactosa'],
+        },
       }),
     )
     expect(row.fecha).toBe('2025-09-02')
     expect(row.hora).toBe('08:15')
     expect(row.tipo).toBe('Comida')
     expect(row.contenido).toBe('Café con leche + 2 magdalenas')
-    expect(row.cantidad).toBe('normal')
+    expect(row.copiosidad).toBe('Copiosa')
+    expect(row.alergenos).toBe('Gluten + Lactosa')
     expect(row.bristol).toBe('')
     expect(row.sintoma).toBe('')
   })
@@ -65,6 +70,12 @@ describe('eventToRow', () => {
     expect(row.sintoma).toBe('Retortijón raro')
     expect(row.intensidad).toBe('0')
     expect(row.duracion_min).toBe('30')
+  })
+
+  it('omeprazol: sí por defecto, no si se marca explícitamente', () => {
+    expect(eventToRow(base({ type: 'omeprazole', data: {} })).omeprazol).toBe('Sí')
+    expect(eventToRow(base({ type: 'omeprazole', data: { taken: true } })).omeprazol).toBe('Sí')
+    expect(eventToRow(base({ type: 'omeprazole', data: { taken: false } })).omeprazol).toBe('No')
   })
 })
 
